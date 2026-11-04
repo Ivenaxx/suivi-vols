@@ -9,7 +9,7 @@ import statistics
 from collections import defaultdict
 
 from common import (COMBOS_CSV, FLIGHTS_CSV, HISTORY_CSV, SEARCHES_CSV, SITE, USAGE_JSON, WEEKDAYS_FR,
-                    all_combinations, combo_id, is_purchased, load_config, load_trips, now_iso, parse_date,
+                    all_combinations, combo_id, fallback_target, is_purchased, load_config, load_trips, now_iso, parse_date,
                     read_json, read_rows, to_float, today_utc)
 from planner import trip_status
 
@@ -50,7 +50,7 @@ def verdict(price, target, days_to_deadline, min_observed, purchased):
         return "Surveiller", ("Prix à moins de 5 % du prix cible." if target is not None and price <= target * 1.05
                               else "La date limite approche.")
     if target is None:
-        return "Attendre", ("Pas de prix cible : Google n'a pas fourni de fourchette typique. "
+        return "Attendre", ("Pas encore de prix cible calculable (voir ci-dessous). "
                             "Il reste du temps avant la date limite.")
     return "Attendre", "Le prix est au-dessus du prix cible et il reste du temps."
 
@@ -105,9 +105,17 @@ def main() -> None:
                        and s["combination"] == row["combination"]]
             tl = to_float(typical[-1]["typical_low"]) if typical else None
             th = to_float(typical[-1]["typical_high"]) if typical else None
-            target = tl if trip["target_price"] in (None, "", "auto") else float(trip["target_price"])
+            if trip["target_price"] not in (None, "", "auto"):
+                target, target_source = float(trip["target_price"]), "fixe"
+            elif tl is not None:
+                target, target_source = tl, "auto : bas de la fourchette typique de Google"
+            else:
+                target = fallback_target(trip, t_combos, last_day)
+                target_source = (f"auto, repli : {trip['target_fallback_pct']:g} % sous le meilleur prix "
+                                 f"des jours précédents (Google n'a pas donné de fourchette)") if target else \
+                    "auto : pas encore calculable (il faut au moins un jour de données précédent)"
             best = {"date": last_day, "price": price, "mode": mode, "combination": row["combination"],
-                    "typical_low": tl, "typical_high": th, "target": target,
+                    "typical_low": tl, "typical_high": th, "target": target, "target_source": target_source,
                     "legs": [{"direction": "retour" if f["mode"] == "return_detail" else f["direction"],
                               "airlines": f["airlines"], "flight_numbers": f["flight_numbers"],
                               "departure_time": f["departure_time"], "arrival_time": f["arrival_time"],

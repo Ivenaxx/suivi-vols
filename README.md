@@ -89,6 +89,10 @@ et colle-le en dessous. Change au minimum :
 
 **Prix cible** : `target_price: auto` pour utiliser le bas de la fourchette typique de Google,
 recalculé chaque jour. Mets un nombre (`target_price: 850`) pour un montant fixe.
+Google ne fournit pas toujours cette fourchette (c'est le cas pour `noel-2026` avec les filtres
+vol direct + bagage + horaire). Dans ce cas, `auto` se replie sur **`target_fallback_pct` % sous
+le meilleur prix observé les jours précédents** (5 % par défaut ; `0` désactive le repli).
+L'alerte « prix cible atteint » signifie alors : « un prix vient de battre nettement le record ».
 
 **Phases**, pour un voyage suivi longtemps à l'avance :
 

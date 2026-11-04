@@ -134,6 +134,7 @@ def normalize_trip(t: dict) -> dict:
                   "one_way": bool(modes.get("one_way", False))}
     t.setdefault("return_flight_detail", "cheapest_round_trip")
     t.setdefault("target_price", "auto")
+    t["target_fallback_pct"] = float(t.get("target_fallback_pct", 5) or 0)
     t["purchase_deadline"] = (parse_date(t.get("purchase_deadline")) or
                               parse_date(t["outbound_options"][0]["date"])).isoformat()
     t.setdefault("after_deadline", "reduced")
@@ -222,6 +223,23 @@ def write_json(name: str, obj) -> None:
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
     tmp.replace(path)
+
+
+def fallback_target(trip: dict, combo_rows: list[dict], before: str) -> float | None:
+    """Repli du prix cible « auto » quand Google ne donne pas de fourchette typique :
+    X % sous le meilleur prix observé AVANT ce jour (aller-retour ou deux allers simples)."""
+    if not trip.get("target_fallback_pct"):
+        return None
+    vals = []
+    for c in combo_rows:
+        if c["trip_id"] == trip["id"] and c["run_date"] < before:
+            for k in ("round_trip_price", "one_way_total"):
+                v = to_float(c.get(k))
+                if v is not None:
+                    vals.append(v)
+    if not vals:
+        return None
+    return round(min(vals) * (1 - trip["target_fallback_pct"] / 100), 2)
 
 
 def to_float(value) -> float | None:

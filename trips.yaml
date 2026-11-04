@@ -43,6 +43,9 @@ trips:
     #   auto = bas de la fourchette « typique » de Google, recalculé chaque jour
     #   ou un montant fixe, par exemple : 950
     target_price: auto
+    # Repli de « auto » quand Google ne donne pas de fourchette typique :
+    # cible = X % sous le meilleur prix observé les jours précédents (0 = pas de repli).
+    target_fallback_pct: 5
 
     purchase_deadline: "2026-11-20"
 

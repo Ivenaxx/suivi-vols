@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import datetime as dt
 
-from common import ALERTS_JSON, SEARCHES_CSV, is_purchased, parse_date, read_json, read_rows, to_float, write_json
+from common import (ALERTS_JSON, COMBOS_CSV, SEARCHES_CSV, fallback_target, is_purchased, parse_date, read_json,
+                    read_rows, to_float, write_json)
 from notify import send
 
 
@@ -11,8 +12,9 @@ def _fmt(price, currency) -> str:
     return f"{price:,.0f} {currency}".replace(",", " ")
 
 
-def target_for(trip: dict, combo_row: dict, searches: list[dict]) -> float | None:
-    """Prix cible : montant fixe, ou bas de la fourchette typique de Google (« auto »)."""
+def target_for(trip: dict, combo_row: dict, searches: list[dict], combo_rows: list[dict]) -> float | None:
+    """Prix cible : montant fixe, ou bas de la fourchette typique de Google (« auto »),
+    ou, à défaut, X % sous le meilleur prix observé les jours précédents."""
     t = trip["target_price"]
     if t not in (None, "", "auto"):
         return float(t)
@@ -27,12 +29,15 @@ def target_for(trip: dict, combo_row: dict, searches: list[dict]) -> float | Non
                 and to_float(r["typical_low"]) is not None):
             if best is None or r["timestamp"] > best[0]:
                 best = (r["timestamp"], to_float(r["typical_low"]))
-    return best[1] if best else None
+    if best:
+        return best[1]
+    return fallback_target(trip, combo_rows, combo_row["run_date"])
 
 
 def check_alerts(config: dict, trips: list[dict], today: dt.date, results: dict) -> None:
     state = read_json(ALERTS_JSON, {})
     searches = read_rows(SEARCHES_CSV)
+    combo_rows = read_rows(COMBOS_CSV)
     for trip in trips:
         if is_purchased(trip):
             continue
@@ -61,7 +66,7 @@ def check_alerts(config: dict, trips: list[dict], today: dt.date, results: dict)
         # 2) Prix cible atteint
         hits = []
         for c in combos:
-            target = target_for(trip, c, searches)
+            target = target_for(trip, c, searches, combo_rows)
             best = min([p for p in (c["round_trip_price"], c["one_way_total"]) if p is not None], default=None)
             if target is not None and best is not None and best <= target:
                 hits.append((best, c["combination"], target))

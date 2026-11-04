@@ -102,8 +102,8 @@ function renderBest(t) {
     <div>${b.mode === "allers_simples" ? "Deux allers simples" : "Aller-retour"} · ${comboLabel(b.combination)}</div>
     <div><span class="badge ${cls}">${icon} ${v.label}</span> <span class="small">${esc(v.reason)}</span></div>
     <div class="small muted">Prix cible : ${b.target != null ? money(b.target, t.currency) : "—"}
-      ${t.target_price === "auto" ? "(auto : bas de la fourchette typique de Google)" : "(fixe)"}
-      · fourchette typique : ${money(b.typical_low, t.currency)} – ${money(b.typical_high, t.currency)}
+      (${esc(b.target_source || "")})
+      · fourchette typique Google : ${b.typical_low != null ? `${money(b.typical_low, t.currency)} – ${money(b.typical_high, t.currency)}` : "non fournie"}
       · minimum observé : ${money(t.min_observed, t.currency)}</div>
     <div class="legs">${legs || '<span class="small muted">Détail des vols indisponible.</span>'}</div>`;
 }

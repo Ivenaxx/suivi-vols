@@ -94,6 +94,14 @@ class Tests(unittest.TestCase):
         self.assertEqual(time_window({"depart_before": "19:00"}), "0,18")
         self.assertIsNone(time_window({}))
 
+    def test_fallback_target(self):
+        trip = common.load_trips()[0]
+        rows = [{"trip_id": trip["id"], "run_date": "2026-11-04", "round_trip_price": "1821", "one_way_total": "2258"},
+                {"trip_id": trip["id"], "run_date": "2026-11-05", "round_trip_price": "1700", "one_way_total": ""}]
+        self.assertIsNone(common.fallback_target(trip, rows, "2026-11-04"))
+        self.assertAlmostEqual(common.fallback_target(trip, rows, "2026-11-05"), 1729.95)
+        self.assertAlmostEqual(common.fallback_target(trip, rows, "2026-11-06"), 1615.0)
+
     def test_cycle(self):
         s, e = current_cycle(dt.date(2026, 10, 31), dt.date(2026, 11, 4))
         self.assertEqual((s, e), (dt.date(2026, 10, 31), dt.date(2026, 11, 30)))
