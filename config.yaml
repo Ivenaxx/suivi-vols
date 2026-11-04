@@ -1,0 +1,41 @@
+# ============================================================
+#  Configuration globale de suivi-vols
+#  (les réglages propres à chaque voyage sont dans trips.yaml)
+# ============================================================
+
+budget:
+  # Nombre maximum de recherches SerpApi par cycle (le forfait gratuit en donne 250 :
+  # on garde 10 recherches de marge pour tes tests manuels sur le site de SerpApi).
+  max_searches_per_cycle: 240
+
+  # Date de renouvellement du quota SerpApi, au format AAAA-MM-JJ.
+  # Tu la trouves sur https://serpapi.com/dashboard. Une seule date suffit :
+  # l'outil en déduit les suivantes (même jour, chaque mois).
+  # Si tu la laisses vide, l'outil utilise la date renvoyée par l'API « Account »
+  # de SerpApi (gratuite, ne consomme pas de recherche).
+  renewal_date: ""
+
+  # Vérifier le vrai compteur chez SerpApi avant chaque lancement (gratuit).
+  # Le compteur local est alors aligné sur le plus prudent des deux.
+  use_account_api: true
+
+  # Pour la 3e étape de réduction : nombre de combinaisons gardées par voyage.
+  best_combinations_kept: 2
+
+# Heure de collecte quotidienne (UTC). Attention : l'heure réellement utilisée par GitHub
+# est celle de la ligne « cron » dans .github/workflows/daily.yml. Si tu changes l'une,
+# change l'autre. (11:00 UTC = 6 h à Montréal en hiver, 7 h en été.)
+collect_time_utc: "11:00"
+
+alerts:
+  # Serveur ntfy (le service public et gratuit par défaut).
+  ntfy_server: "https://ntfy.sh"
+  # Adresse de ton site GitHub Pages : un clic sur la notification l'ouvre.
+  # Exemple : "https://ton-pseudo.github.io/suivi-vols/"
+  site_url: "https://ivenaxx.github.io/suivi-vols/"
+
+suggestions:
+  # Une combinaison est signalée si elle n'a JAMAIS été à moins de X % du minimum du jour.
+  never_within_pct: 10
+  # Nombre minimum de jours d'observation avant de proposer une suggestion.
+  min_days_observed: 5

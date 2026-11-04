@@ -1,0 +1,76 @@
+# ============================================================
+#  Voyages suivis : un bloc par voyage (copie-colle un bloc pour en ajouter un).
+#  Les dates s'écrivent toujours entre guillemets : "AAAA-MM-JJ".
+#  Les heures s'écrivent "HH:MM" (heure locale de l'aéroport de départ).
+# ============================================================
+
+trips:
+  - id: noel-2026                 # identifiant court, unique, sans espace
+    name: "Noël à Paris 2026"
+
+    origin: YUL                   # aéroport de départ (code IATA)
+    destination: CDG              # aéroport d'arrivée
+    nonstop_only: true            # true = vols directs uniquement
+    adults: 1
+    travel_class: economy         # economy | premium_economy | business | first
+    carry_on_bags: 1              # nombre de bagages cabine
+    currency: CAD
+    language: fr
+    country: ca
+
+    # Dates possibles pour l'aller. depart_after / depart_before sont facultatifs.
+    outbound_options:
+      - date: "2026-12-16"
+        depart_after: "20:00"
+      - date: "2026-12-17"
+
+    # Dates possibles pour le retour (même principe).
+    return_options:
+      - date: "2027-01-04"
+      - date: "2027-01-05"
+      - date: "2027-01-06"
+
+    modes:
+      round_trip: true            # aller-retour : toutes les combinaisons aller × retour
+      one_way: true               # allers simples : chaque date aller et chaque date retour
+
+    # Détail du vol retour (1 recherche de plus par jour) :
+    #   cheapest_round_trip = seulement pour l'aller-retour le moins cher du jour
+    #   none                = jamais
+    return_flight_detail: cheapest_round_trip
+
+    # Prix cible (prix total du voyage, dans la devise ci-dessus) :
+    #   auto = bas de la fourchette « typique » de Google, recalculé chaque jour
+    #   ou un montant fixe, par exemple : 950
+    target_price: auto
+
+    purchase_deadline: "2026-11-20"
+
+    # Après la date limite, si aucun prix d'achat n'est renseigné :
+    #   reduced = aller-retour seulement, chaque jour, jusqu'au départ
+    #   stop    = on arrête tout
+    after_deadline: reduced
+
+    # À remplir quand tu as acheté : le suivi de ce voyage s'arrête alors.
+    purchase:
+      price: null                 # exemple : 1012.45
+      date: null                  # exemple : "2026-11-15"
+
+    # Phases de suivi (avant la date limite).
+    #   exploration_days   : les N premiers jours, tout, chaque jour
+    #   watch_every_days   : ensuite, une recherche tous les X jours…
+    #   watch_combinations : …pour ces combinaisons seulement ("all" = toutes,
+    #                        "best" = les meilleures selon l'historique,
+    #                        ou une liste, ex. ["2026-12-16_2027-01-04"])
+    #   decision_days      : les M derniers jours avant la date limite, tout, chaque jour
+    # Pour noel-2026 : tout, chaque jour, jusqu'à la date limite.
+    tracking_start: "2026-11-04"
+    phases:
+      exploration_days: 0
+      watch_every_days: 1
+      watch_combinations: all
+      decision_days: 0
+
+    # Combinaisons à ne plus rechercher, au format "ALLER_RETOUR".
+    # Exemple : excluded_combinations: ["2026-12-17_2027-01-06"]
+    excluded_combinations: []

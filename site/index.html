@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suivi des vols</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="shared.js"></script>
+</head>
+<body>
+  <header class="top">
+    <h1>✈ Suivi des vols</h1>
+    <nav><a href="index.html" class="on">Tableau de bord</a><a href="analyse.html">Analyse</a></nav>
+    <button id="theme" type="button">Thème : auto</button>
+  </header>
+  <main>
+    <section class="card">
+      <div class="filters" id="filters">
+        <label>Voyage <select id="f-trip"></select></label>
+        <label>Combinaison <select id="f-combo"></select></label>
+        <label>Mode
+          <select id="f-mode">
+            <option value="all">Les deux</option>
+            <option value="rt">Aller-retour</option>
+            <option value="ow">Deux allers simples</option>
+          </select>
+        </label>
+        <label>Compagnie <select id="f-airline"></select></label>
+        <label>Départ aller de <input type="time" id="f-tfrom"></label>
+        <label>à <input type="time" id="f-tto"></label>
+        <label>Recherches du <input type="date" id="f-dfrom"></label>
+        <label>au <input type="date" id="f-dto"></label>
+        <button type="button" id="f-reset">Réinitialiser</button>
+      </div>
+      <p class="small muted" id="trip-info"></p>
+    </section>
+
+    <div class="grid2">
+      <section class="card best" id="best"></section>
+      <section class="card" id="quota"></section>
+    </div>
+
+    <section class="card">
+      <h2 id="chart-title">Évolution du prix</h2>
+      <div class="chart-box"><canvas id="chart"></canvas></div>
+      <p class="small muted">Bande grise : fourchette « typique » de Google (une seule combinaison sélectionnée).
+        Ligne pointillée : minimum du jour toutes combinaisons. Trait vertical : date limite d'achat.</p>
+    </section>
+
+    <section class="card">
+      <h2>Prix par jour de recherche et combinaison</h2>
+      <div class="scroll" style="max-height: 460px;" id="heat"></div>
+    </section>
+
+    <section class="card">
+      <h2>Suggestions</h2>
+      <div id="sugg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Toutes les options de vol <span class="muted small" id="tbl-count"></span></h2>
+      <div class="scroll" style="max-height: 560px;" id="tbl"></div>
+      <p><button type="button" id="tbl-more" hidden>Tout afficher</button></p>
+    </section>
+
+    <p class="small muted" id="generated"></p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

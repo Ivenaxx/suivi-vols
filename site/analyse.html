@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analyse des prix</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="shared.js"></script>
+</head>
+<body>
+  <header class="top">
+    <h1>✈ Suivi des vols</h1>
+    <nav><a href="index.html">Tableau de bord</a><a href="analyse.html" class="on">Analyse</a></nav>
+    <button id="theme" type="button">Thème : auto</button>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Comment lire cette page</h2>
+      <p class="small">Tous les voyages sont mélangés. Pour pouvoir les comparer, chaque prix aller-retour est exprimé
+        en <strong>% au-dessus du prix le plus bas jamais vu pour la même combinaison de dates</strong>
+        (0 % = le meilleur prix observé). Plus la barre est basse, plus c'était un bon moment pour chercher.
+        <strong>n</strong> = nombre d'observations : en dessous de <span id="min-n"></span>, le résultat est grisé
+        car il repose sur trop peu de données pour conclure.</p>
+      <p class="small muted" id="obs"></p>
+    </section>
+    <section class="card">
+      <h2>Prix selon le nombre de jours avant le départ</h2>
+      <div class="chart-box"><canvas id="c-days"></canvas></div>
+      <div class="scroll" id="t-days"></div>
+    </section>
+    <section class="card">
+      <h2>Prix selon le jour de la semaine de la recherche</h2>
+      <div class="chart-box"><canvas id="c-wd"></canvas></div>
+      <div class="scroll" id="t-wd"></div>
+    </section>
+    <section class="card">
+      <h2>Prix payé comparé au minimum observé</h2>
+      <div class="scroll" id="t-paid"></div>
+    </section>
+  </main>
+  <script src="analyse.js"></script>
+</body>
+</html>

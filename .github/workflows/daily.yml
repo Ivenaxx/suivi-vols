@@ -1,0 +1,78 @@
+name: Collecte quotidienne
+
+on:
+  schedule:
+    - cron: "0 11 * * *"   # tous les jours à 11:00 UTC (garder en accord avec config.yaml)
+  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main
+    inputs:
+      dry_run:
+        description: "Simulation : afficher le plan sans faire de recherche"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # pour enregistrer data/ dans le dépôt
+  pages: write      # pour publier le site
+  id-token: write
+
+# Jamais deux lancements en même temps (protège le compteur de recherches).
+concurrency:
+  group: suivi-vols
+  cancel-in-progress: false
+
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Collecter les prix
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python src/fetch_prices.py --dry-run
+          else
+            python src/fetch_prices.py
+          fi
+
+      - name: Construire le site
+        run: python src/build_site.py
+
+      - name: Enregistrer data/ dans le dépôt
+        if: always()   # même si la collecte a échoué : le compteur de recherches doit être sauvegardé
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Rien de nouveau à enregistrer."
+          else
+            git commit -m "Collecte du $(date -u +%Y-%m-%d)"
+            git pull --rebase   # au cas où tu as modifié trips.yaml pendant le lancement
+            git push
+          fi
+
+      - name: Préparer le site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploiement:
+    needs: collecte
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

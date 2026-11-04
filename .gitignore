@@ -1,0 +1,7 @@
+# Généré à chaque lancement par build_site.py (pas besoin de l'enregistrer)
+site/data.json
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/*.tmp
