@@ -1,0 +1,12 @@
+{
+  "cycle_start": "2026-11-04",
+  "used": 0,
+  "by_day": {},
+  "reduction_level": 0,
+  "previous_cycles": [],
+  "cycle_end": "2026-12-04",
+  "cap": 240,
+  "anchor_source": "API Account SerpApi",
+  "account_used": 0,
+  "account_checked_at": "2026-11-04T17:24:12+00:00"
+}
