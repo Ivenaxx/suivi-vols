@@ -49,6 +49,9 @@ def verdict(price, target, days_to_deadline, min_observed, purchased):
     if (target is not None and price <= target * 1.05) or (days_to_deadline is not None and days_to_deadline <= 7):
         return "Surveiller", ("Prix à moins de 5 % du prix cible." if target is not None and price <= target * 1.05
                               else "La date limite approche.")
+    if target is None:
+        return "Attendre", ("Pas de prix cible : Google n'a pas fourni de fourchette typique. "
+                            "Il reste du temps avant la date limite.")
     return "Attendre", "Le prix est au-dessus du prix cible et il reste du temps."
 
 
