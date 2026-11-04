@@ -1,0 +1,12 @@
+timestamp,run_date,trip_id,mode,direction,outbound_date,return_date,combination,days_before_departure,search_weekday,status,lowest_price,price_level,typical_low,typical_high,num_options,reduction_level,error
+2026-11-04T17:49:19+00:00,2026-11-04,noel-2026,round_trip,aller-retour,2026-12-16,2027-01-04,2026-12-16_2027-01-04,42,mercredi,ok,2042,,,,3,2,
+2026-11-04T17:49:21+00:00,2026-11-04,noel-2026,round_trip,aller-retour,2026-12-16,2027-01-05,2026-12-16_2027-01-05,42,mercredi,ok,1887,,,,3,2,
+2026-11-04T17:49:24+00:00,2026-11-04,noel-2026,round_trip,aller-retour,2026-12-16,2027-01-06,2026-12-16_2027-01-06,42,mercredi,ok,1821,,,,3,2,
+2026-11-04T17:49:28+00:00,2026-11-04,noel-2026,round_trip,aller-retour,2026-12-17,2027-01-04,2026-12-17_2027-01-04,43,mercredi,ok,2303,,,,6,2,
+2026-11-04T17:49:29+00:00,2026-11-04,noel-2026,round_trip,aller-retour,2026-12-17,2027-01-05,2026-12-17_2027-01-05,43,mercredi,ok,2180,,,,6,2,
+2026-11-04T17:49:32+00:00,2026-11-04,noel-2026,round_trip,aller-retour,2026-12-17,2027-01-06,2026-12-17_2027-01-06,43,mercredi,ok,2226,,,,6,2,
+2026-11-04T17:49:36+00:00,2026-11-04,noel-2026,one_way,aller,2026-12-16,,,42,mercredi,ok,1156,,,,3,2,
+2026-11-04T17:49:38+00:00,2026-11-04,noel-2026,one_way,aller,2026-12-17,,,43,mercredi,ok,1357,,,,6,2,
+2026-11-04T17:49:41+00:00,2026-11-04,noel-2026,one_way,retour,2027-01-04,,,61,mercredi,ok,1463,,,,6,2,
+2026-11-04T17:49:46+00:00,2026-11-04,noel-2026,one_way,retour,2027-01-05,,,62,mercredi,ok,1102,,,,7,2,
+2026-11-04T17:49:51+00:00,2026-11-04,noel-2026,one_way,retour,2027-01-06,,,63,mercredi,ok,1463,,,,4,2,
