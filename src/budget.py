@@ -115,16 +115,24 @@ class Budget:
         day = self.today
         while day < self.cycle_end:
             for trip in trips:
-                tasks = plan_day(trip, day, level, rankings[trip["id"]], best_kept)
+                rk = rankings[trip["id"]]
+                tasks = plan_day(trip, day, level, rk["best"], best_kept, rk["recent"])
                 if day == self.today:
                     tasks = [t for t in tasks if t["key"] not in done_today]
                 total += len(tasks)
             day += dt.timedelta(days=1)
         return total
 
-    def choose_level(self, trips, rankings, done_today) -> dict:
-        """Choisit le plus petit niveau de réduction qui tient dans le budget restant."""
+    def choose_level(self, trips, rankings, done_today, signature: str = "") -> dict:
+        """Choisit le plus petit niveau de réduction qui tient dans le budget restant.
+
+        `signature` résume les réglages des voyages : s'ils ont changé, on repart sans tenir
+        compte du niveau précédent (la marge anti va-et-vient ne s'applique qu'à réglages égaux)."""
         remaining = self.remaining
+        if signature and self.state.get("plan_signature") != signature:
+            self.state["plan_signature"] = signature
+            self.state["reduction_level"] = 0
+            self.state["max_level_notified"] = 0
         previous = int(self.state.get("reduction_level", 0))
         options = [(lvl, self.best_kept) for lvl in (0, 1, 2)]
         options += [(3, k) for k in range(self.best_kept, 0, -1)]

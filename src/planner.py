@@ -61,7 +61,34 @@ def rank_combinations(trip: dict, searches: list[dict]) -> list[str]:
     return sorted(combos, key=lambda c: (last[c][1] if c in last else float("inf"), combos.index(c)))
 
 
-def plan_day(trip: dict, day: dt.date, level: int, ranking: list[str], best_kept: int) -> list[dict]:
+def rank_recent(trip: dict, searches: list[dict], today: dt.date, days: int) -> list[str]:
+    """Combinaisons triées par meilleur prix aller-retour des `days` derniers jours (aujourd'hui exclu).
+
+    Sans prix récent, une combinaison passe après les autres, triée par son dernier prix connu."""
+    since = (today - dt.timedelta(days=days)).isoformat()
+    best: dict[str, float] = {}
+    for r in searches:
+        if (r.get("trip_id") != trip["id"] or r.get("mode") != "round_trip" or r.get("status") != "ok"
+                or not (since <= r.get("run_date", "") < today.isoformat())):
+            continue
+        try:
+            price = float(r["lowest_price"])
+        except (TypeError, ValueError):
+            continue
+        best[r["combination"]] = min(price, best.get(r["combination"], price))
+    fallback = rank_combinations(trip, searches)
+    return sorted(fallback, key=lambda c: (best.get(c, float("inf")), fallback.index(c)))
+
+
+def _keep_first(combos: list[tuple[str, str]], ranking: list[str], n: int) -> list[tuple[str, str]]:
+    """Garde les n combinaisons encore possibles les mieux classées (ordre du fichier si pas de classement)."""
+    order = {c: i for i, c in enumerate(ranking)}
+    ranked = sorted(combos, key=lambda c: order.get(combo_id(*c), len(order)))
+    return ranked[:n]
+
+
+def plan_day(trip: dict, day: dt.date, level: int, ranking: list[str], best_kept: int,
+             reduced_ranking: list[str] | None = None) -> list[dict]:
     status = trip_status(trip, day)
     if status not in ("active", "reduced"):
         return []
@@ -74,6 +101,9 @@ def plan_day(trip: dict, day: dt.date, level: int, ranking: list[str], best_kept
 
     if status == "reduced":
         one_way, detail = False, False
+        if trip["reduced_combinations"] and trip["return_options"]:
+            combos = _keep_first(combos, reduced_ranking if reduced_ranking is not None else ranking,
+                                 trip["reduced_combinations"])
     else:
         ph = phase(trip, day)
         if ph == "veille":
@@ -95,8 +125,7 @@ def plan_day(trip: dict, day: dt.date, level: int, ranking: list[str], best_kept
     if level >= 2:
         detail = False
     if level >= 3:
-        keep = set(ranking[:best_kept])
-        combos = [c for c in combos if combo_id(*c) in keep]
+        combos = _keep_first(combos, ranking, best_kept)
 
     if not combos:
         return []

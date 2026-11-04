@@ -53,6 +53,10 @@ trips:
     #   reduced = aller-retour seulement, chaque jour, jusqu'au départ
     #   stop    = on arrête tout
     after_deadline: reduced
+    # En mode réduit : seulement les N combinaisons les moins chères des X derniers jours
+    # (reduced_combinations: 0 = toutes les combinaisons).
+    reduced_combinations: 2
+    reduced_lookback_days: 3
 
     # À remplir quand tu as acheté : le suivi de ce voyage s'arrête alors.
     purchase:

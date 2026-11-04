@@ -136,7 +136,9 @@ Dès le prochain lancement, ce voyage n'est plus recherché et ne consomme plus 
 apparaît sur la page Analyse, comparé au minimum observé.
 
 Si la date limite passe **sans** prix d'achat, l'outil continue en **mode réduit**
-(aller-retour seulement, chaque jour, jusqu'au départ). Pour tout arrêter, mets `after_deadline: stop`.
+(aller-retour seulement, chaque jour, jusqu'au départ). Il ne garde alors que les
+`reduced_combinations` combinaisons les moins chères des `reduced_lookback_days` derniers jours
+(2 et 3 pour `noel-2026`). Pour tout arrêter, mets `after_deadline: stop`.
 
 ## 5. Lancer à la main
 
@@ -224,12 +226,15 @@ combinaison de dates (0 % = le meilleur prix vu).
   3. seulement les meilleures combinaisons (`best_combinations_kept` dans `config.yaml`) ;
   4. en dernier recours, un nombre fixe de recherches par jour.
 
-  Tu reçois une notification quand une réduction démarre.
+  Tu reçois une notification quand une réduction démarre. Pour éviter les va-et-vient, revenir
+  à un niveau moins réduit demande 10 % de marge, sauf si tu viens de modifier `trips.yaml` ou le
+  budget : le choix repart alors de zéro.
 - Dans tous les cas, aucune recherche n'est envoyée si elle ferait dépasser 240.
 
-Ordre de grandeur pour `noel-2026` : 6 allers-retours + 5 allers simples + 1 détail = **12
-recherches par jour** jusqu'au 20 novembre. Ensuite, 6 par jour en mode réduit jusqu'au départ.
-Selon ta date de renouvellement, il est normal qu'une réduction se déclenche.
+Projection pour `noel-2026` sur le cycle du 4 novembre au 4 décembre :
+6 allers-retours + 5 allers simples + 1 détail = **12 recherches par jour** du 5 au 20 novembre
+(16 jours, soit 192), puis **2 par jour** en mode réduit du 21 novembre au 3 décembre (13 jours,
+soit 26). Avec les 11 du 4 novembre, le total est de **229 sur 240** : aucune réduction n'est nécessaire.
 
 ## 9. Les fichiers du projet
 

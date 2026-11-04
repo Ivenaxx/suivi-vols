@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import gzip
+import hashlib
 import json
 import os
 import re
@@ -23,7 +24,7 @@ from common import (COMBO_FIELDS, COMBOS_CSV, FLIGHT_FIELDS, FLIGHTS_CSV, HISTOR
                     to_float, today_utc)
 from notify import send
 from parse import insights, lowest, parse_options
-from planner import plan_day, rank_combinations
+from planner import plan_day, rank_combinations, rank_recent
 from serpapi_client import SerpApiClient, base_params, time_window
 
 DONE_STATUSES = {"ok", "no_results"}
@@ -239,8 +240,12 @@ def main() -> int:
     done_today = {f"{r['trip_id']}|return_detail" if r["mode"] == "return_detail" else
                   f"{r['trip_id']}|{r['mode']}|{r['direction']}|{r['outbound_date']}|{r['return_date']}"
                   for r in searches if r["run_date"] == today.isoformat() and r["status"] in DONE_STATUSES}
-    rankings = {t["id"]: rank_combinations(t, searches) for t in trips}
-    choice = budget.choose_level(trips, rankings, done_today)
+    rankings = {t["id"]: {"best": rank_combinations(t, searches),
+                          "recent": rank_recent(t, searches, today, t["reduced_lookback_days"])}
+                for t in trips}
+    signature = hashlib.sha256(json.dumps([config["budget"], trips], sort_keys=True,
+                                          default=str).encode()).hexdigest()[:16]
+    choice = budget.choose_level(trips, rankings, done_today, signature)
 
     print(f"Date (UTC) : {today}  |  quota : {budget.used}/{budget.cap} utilisées, "
           f"cycle {budget.cycle_start} → {budget.cycle_end} (renouvellement : {budget.anchor_source})")
@@ -249,7 +254,8 @@ def main() -> int:
 
     plans = {}
     for trip in trips:
-        tasks = plan_day(trip, today, choice["level"], rankings[trip["id"]], choice["best_kept"])
+        rk = rankings[trip["id"]]
+        tasks = plan_day(trip, today, choice["level"], rk["best"], choice["best_kept"], rk["recent"])
         plans[trip["id"]] = [t for t in tasks if t["key"] not in done_today]
         print(f"- {trip['id']} : {len(plans[trip['id']])} recherche(s) prévue(s) aujourd'hui")
 

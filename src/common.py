@@ -138,6 +138,8 @@ def normalize_trip(t: dict) -> dict:
     t["purchase_deadline"] = (parse_date(t.get("purchase_deadline")) or
                               parse_date(t["outbound_options"][0]["date"])).isoformat()
     t.setdefault("after_deadline", "reduced")
+    t["reduced_combinations"] = int(t.get("reduced_combinations", 0) or 0)  # 0 = toutes
+    t["reduced_lookback_days"] = max(1, int(t.get("reduced_lookback_days", 3) or 3))
     purchase = t.get("purchase") or {}
     t["purchase"] = {"price": purchase.get("price"), "date": purchase.get("date")}
     t["tracking_start"] = (parse_date(t.get("tracking_start")) or dt.date(2000, 1, 1)).isoformat()

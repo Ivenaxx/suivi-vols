@@ -113,8 +113,23 @@ class Tests(unittest.TestCase):
         self.assertEqual(modes.count("round_trip"), 6)
         self.assertEqual(modes.count("one_way"), 5)
         self.assertEqual(modes.count("return_detail"), 1)
-        reduced = planner.plan_day(trip, dt.date(2026, 11, 25), 0, [], 2)
+        reduced = planner.plan_day(trip, dt.date(2026, 11, 25), 0, [], 2,
+                                   ["2026-12-17_2027-01-05", "2026-12-16_2027-01-06"])
         self.assertEqual({t["mode"] for t in reduced}, {"round_trip"})
+        self.assertEqual({t["key"].split("|", 3)[3] for t in reduced},
+                         {"2026-12-17|2027-01-05", "2026-12-16|2027-01-06"})
+
+    def test_rank_recent(self):
+        trip = common.load_trips()[0]
+        rows = [{"trip_id": trip["id"], "mode": "round_trip", "status": "ok", "run_date": d,
+                 "timestamp": d, "combination": c, "lowest_price": p}
+                for d, c, p in [("2026-11-15", "2026-12-17_2027-01-04", "900"),  # trop ancien
+                                ("2026-11-19", "2026-12-16_2027-01-05", "1500"),
+                                ("2026-11-20", "2026-12-16_2027-01-05", "1700"),
+                                ("2026-11-20", "2026-12-17_2027-01-06", "1600"),
+                                ("2026-11-21", "2026-12-16_2027-01-04", "1000")]]  # aujourd'hui : exclu
+        rank = planner.rank_recent(trip, rows, dt.date(2026, 11, 21), 3)
+        self.assertEqual(rank[:2], ["2026-12-16_2027-01-05", "2026-12-17_2027-01-06"])
 
     def test_full_simulation_never_exceeds_cap(self):
         day = dt.date(2026, 11, 4)
@@ -125,6 +140,18 @@ class Tests(unittest.TestCase):
         usage = common.read_json(common.USAGE_JSON, {})
         for prev in usage.get("previous_cycles", []) + [usage]:
             self.assertLessEqual(prev["used"], 240)
+        first = usage["previous_cycles"][0]
+        self.assertEqual(first["cycle_start"], "2026-11-04")
+        rows = common.read_rows(common.SEARCHES_CSV)
+        by_day = {}
+        for r in rows:
+            by_day.setdefault(r["run_date"], []).append(r)
+        for d in ("2026-11-05", "2026-11-12", "2026-11-20"):  # couverture complète jusqu'à la date limite
+            distinct = {(r["mode"], r["direction"], r["outbound_date"], r["return_date"]) for r in by_day[d]}
+            self.assertEqual(len(distinct), 12, d)  # une recherche en panne est refaite à la relance
+            self.assertEqual({r["reduction_level"] for r in by_day[d]}, {"0"}, d)
+        self.assertEqual(len(by_day["2026-11-25"]), 2)  # mode réduit : 2 combinaisons
+        self.assertEqual({r["mode"] for r in by_day["2026-11-25"]}, {"round_trip"})
         rows = common.read_rows(common.SEARCHES_CSV)
         self.assertTrue(rows)
         self.assertTrue(any(r["status"] == "error" for r in rows), "la panne simulée doit être enregistrée")
