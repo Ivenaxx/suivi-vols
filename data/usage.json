@@ -1,23 +1,25 @@
 {
   "cycle_start": "2026-11-04",
-  "used": 11,
+  "used": 23,
   "by_day": {
-    "2026-11-04": 11
+    "2026-11-04": 11,
+    "2026-11-05": 12
   },
-  "reduction_level": 2,
+  "reduction_level": 0,
   "previous_cycles": [],
   "cycle_end": "2026-12-04",
   "cap": 240,
   "anchor_source": "API Account SerpApi",
-  "account_used": 0,
-  "account_checked_at": "2026-11-04T17:49:19+00:00",
-  "last_run": "2026-11-04T17:49:19+00:00",
+  "account_used": 11,
+  "account_checked_at": "2026-11-05T11:47:19+00:00",
+  "last_run": "2026-11-05T11:47:19+00:00",
   "projection": {
-    "date": "2026-11-04",
-    "level": 2,
+    "date": "2026-11-05",
+    "level": 0,
     "best_kept": 2,
-    "projected": 225,
-    "remaining": 240
+    "projected": 218,
+    "remaining": 229
   },
-  "max_level_notified": 2
+  "max_level_notified": 0,
+  "plan_signature": "41c31d04f2c1475d"
 }
